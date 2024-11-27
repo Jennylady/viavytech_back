@@ -6,7 +6,7 @@ from apps.menstruation.models import Woman, Menstruation, Ovulation, Symptom, No
 from apps.menstruation.serializers import WomanSerializer, MenstruationSerializer, OvulationSerializer, SymptomSerializer, SymptomLinkWomanSerializer
 from apps.menstruation.permissions import IsAuthenticatedWoman
 from django.contrib.auth.models import AnonymousUser
-from helpers.helper import send_sms
+from helpers.helper import send_sms, get_notification
 
 from datetime import timedelta, datetime
 import traceback
@@ -174,16 +174,13 @@ class PredictionView(APIView):
             today = datetime.now().date()
             if last_menstruation.start_date <= today <= last_menstruation.end_date or predicted_start<=today<=predicted_end_date_duration:
                 current_phase = "menstruation"
-                advice = random.choice(MENSTRUATION_MESSAGES)
             elif last_menstruation.end_date < today < fertility_window_start:
                 current_phase = "normal"
-                advice = random.choice(PRE_OVULATION_MESSAGES)
             elif fertility_window_start <= today <= fertility_window_end:
                 current_phase = "fertile"
-                advice = random.choice(FERTILITY_MESSAGES)
             else:
                 current_phase = "normal"
-                advice = random.choice(POST_OVULATION_MESSAGES)
+            advice = get_notification()
             date_range = []
             numdays = 32
             for x in range(-2,numdays):
@@ -193,16 +190,12 @@ class PredictionView(APIView):
                     date_x = today + timedelta(days=x)
                 if last_menstruation.start_date <= date_x <= last_menstruation.end_date or predicted_start<=date_x<=predicted_end_date_duration:
                     current_phase = "menstruation"
-                    advice = random.choice(MENSTRUATION_MESSAGES)
                 elif last_menstruation.end_date < date_x < fertility_window_start:
                     current_phase = "normal"
-                    advice = random.choice(PRE_OVULATION_MESSAGES)
                 elif fertility_window_start <= date_x <= fertility_window_end:
                     current_phase = "fertile"
-                    advice = random.choice(FERTILITY_MESSAGES)
                 else:
                     current_phase = "normal"
-                    advice = random.choice(POST_OVULATION_MESSAGES)
                 date_range.append({'day':date_x.strftime('%Y-%m-%d'), 'status':current_phase})
 
             data = {

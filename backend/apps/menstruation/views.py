@@ -157,7 +157,7 @@ class PredictionView(APIView):
         try:
             menstruations = request.woman.menstruations.all().order_by('-start_date')
             if menstruations.count()==0:
-                return Response({})
+                return Response({'advice':get_notification(request.woman)})
             last_period = menstruations.first().start_date
             
             predicted_ovulation_date = last_period + timedelta(days=request.woman.average_cycle_length - 14)
@@ -365,16 +365,20 @@ class MenstruationNewFull(APIView):
         try:
             keys=['start_date', 'menstruation_duration', 'symptoms','regle_type']
             if any(key not in data.keys()for key in keys):
+                print('clé manquant...')
                 return False
             start_date = datetime.strptime(data['start_date'],'%Y-%m-%d')
             if start_date>datetime.now():
+                print('date pas encore arrivé....')
                 return False
             symptoms = data['symptoms']
             for symptom_id in symptoms:
                 if not Symptom.objects.filter(id_symptom=symptom_id).exists():
+                    print("symptom introuvable..")
                     return False
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     # request.data.keys = ['start_date', 'cycle_duration', 'menstruation_duration','regle_type', 'symptoms']
@@ -409,7 +413,7 @@ class MenstruationNewFull(APIView):
                     if today_date >= next_start_date:
                         Menstruation.objects.create(start_date=next_start_date,end_date=next_end_date,woman=woman)
                 else:
-                    menstruation= serializer.save()
+                    menstruation = serializer.save()
                 last_menstruation = woman.menstruations.all().order_by('-start_date').first()
                 woman.last_period_date = last_menstruation.start_date
                 

@@ -8,7 +8,7 @@ from apps.forum.views import (PublicationForumListView,PublicationForumFilterVie
 urlpatterns = [
     path('publication/list/',PublicationForumListView.as_view(),name='discussion_list'),#GET
     path('publication/filter/',PublicationForumFilterView.as_view(),name='discussion_filter'),#GET
-    path('publication/profile/<int:discussion_id>/', PublicationForumProfileView.as_view(),name='discussion_profile'),#GET
+    path('publication/profile/<int:publication_id>/', PublicationForumProfileView.as_view(),name='discussion_profile'),#GET
     path('publication/new/', PublicationForumNewView.as_view(), name="publication new"),#POST
     path('publication/new/comment/', CommentPublicationView.as_view(), name='publication comment new'),#POST
     path('message/new/',MessageDFNewView.as_view(),name='message_new'),#POST

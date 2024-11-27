@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone as django_timezone
 
 from apps.users.models import SmsOrangeToken
@@ -11,7 +11,6 @@ import urllib.parse
 import os
 import requests
 import pyttsx3
-import datetime
 import random
 import json
 
@@ -84,7 +83,7 @@ POST_OVULATION_MESSAGES = [
 
 
 def get_notification(woman):
-    menstruations = woman.menstruations.all().order_by('-start_date')
+    menstruations = woman.menstruations.order_by('-start_date')
     if menstruations.count()==0:
         return "Veuiller nous informer de votre dérnier règle pour avoir un peu plus de prevision sur votre cycle menstruel.Sexual Education vous remercie."
     last_period = menstruations.first().start_date
@@ -99,10 +98,10 @@ def get_notification(woman):
     predicted_end_date_duration = predicted_start+timedelta(days=int(woman.average_menstruation_duration))
     
     today = datetime.now().date()
-    if today.strftime('%Y-%m-%d')in [(m.start_date-timedelta(days=2)).strftime('%Y-%m-%d') for m in woman.menstruations.all().order_by('start_date')]+[(predicted_start-timedelta(days=2)).strftime('%Y-%m-%d')]:
+    if today.strftime('%Y-%m-%d')in [(m.start_date-timedelta(days=2)).strftime('%Y-%m-%d') for m in woman.menstruations.order_by('start_date')]+[(predicted_start-timedelta(days=2)).strftime('%Y-%m-%d')]:
         current_phase = "normal"
         advice = random.choice(PRE_MENSTRUATION_TWO_DAYS)
-    elif today.strftime('%Y-%m-%d')in [(m.start_date-timedelta(days=1)).strftime('%Y-%m-%d') for m in woman.menstruations.all().order_by('start_date')]+[(predicted_start-timedelta(days=1)).strftime('%Y-%m-%d')]:
+    elif today.strftime('%Y-%m-%d')in [(m.start_date-timedelta(days=1)).strftime('%Y-%m-%d') for m in woman.menstruations.order_by('start_date')]+[(predicted_start-timedelta(days=1)).strftime('%Y-%m-%d')]:
         current_phase = "normal"
         advice = random.choice(PRE_MENSTRUATION_ONE_DAY)
     elif last_menstruation.start_date <= today <= last_menstruation.end_date or predicted_start<=today<=predicted_end_date_duration:

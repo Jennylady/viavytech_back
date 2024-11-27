@@ -155,7 +155,7 @@ class PredictionView(APIView):
     
     def get(self, request):
         try:
-            menstruations = request.woman.menstruations.all().order_by('-start_date')
+            menstruations = request.woman.menstruations.order_by('-start_date')
             if menstruations.count()==0:
                 return Response({'advice':get_notification(request.woman)})
             last_period = menstruations.first().start_date
@@ -389,8 +389,8 @@ class MenstruationNewFull(APIView):
                 return Response({'error':'veuillez verifier votre donné'},status=400)
             woman = request.woman
             start_date = datetime.strptime(request.data['start_date'], '%Y-%m-%d').date()
-            if woman.menstruations.all().count()!=0:
-                last_menstruation = woman.menstruations.all().order_by('-start_date').first()
+            if woman.menstruations.count()!=0:
+                last_menstruation = woman.menstruations.order_by('-start_date').first()
 
             woman.update_average_menstruation_length()
 
@@ -414,7 +414,7 @@ class MenstruationNewFull(APIView):
                         Menstruation.objects.create(start_date=next_start_date,end_date=next_end_date,woman=woman)
                 else:
                     menstruation = serializer.save()
-                last_menstruation = woman.menstruations.all().order_by('-start_date').first()
+                last_menstruation = woman.menstruations.order_by('-start_date').first()
                 woman.last_period_date = last_menstruation.start_date
                 
                 woman.update_average_menstruation_length()

@@ -58,18 +58,17 @@ class PublicationForumNewView(APIView):
             if 'contenu'not in request.data:
                 return Response({'erreur':'Veuillez verifier votre données'},status=400)
             sender = request.user
+            files = request.FILES.getlist('files',[])
+            images = request.FILES.getlist('images',[])
+            print(request.FILES)
             publication_data = dict(request.data)
             publication_data['contenu']=request.data.get('contenu')
             publication_data['is_anonymous'] = request.data.get("is_anonymous", [False])[0]
             publication_data['user_id'] = request.user.id
             serializer = PublicationForumSerializer(data=publication_data, context=publication_data)
-            publication_data.update(request.FILES)
             serializer.is_valid(raise_exception=True)
             serializer_saved = serializer.save(sender=sender)
             publication = PublicationForum.objects.get(id_publication_forum=serializer_saved.id_publication_forum)
-            files = request.FILES.getlist('files',[])
-            images = request.FILES.getlist('images',[])
-            print(request.FILES)
             
             for file in files:
                 file_instance = FileDF.objects.create(file=file)
@@ -80,8 +79,6 @@ class PublicationForumNewView(APIView):
                 image_instance = ImageDF.objects.create(image=image)
                 publication.images.add(image_instance)
                 print('image added...')
-                for attr, value in vars(image).items():
-                    print(f"{attr}: {value}")
                         
             publication.save()
             return Response({'message':'publication posté avec succès.'})
